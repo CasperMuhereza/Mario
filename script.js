@@ -1,3 +1,5 @@
+
+
 // Get canvas and context
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
@@ -6,7 +8,7 @@ const c = canvas.getContext("2d");
 canvas.width = 1024;
 canvas.height = 576;
 
-// Gravity constant for jumping/falling
+// Gravity constant for jumping/falling (Application Stage: Physics Simulation)
 const gravity = 0.5;
 
 // Load background image and start game when ready
@@ -19,10 +21,10 @@ backgroundImage.src = "./images/background.png";
 
 // --- CLASSES ---
 
-// Player class for the main character
+// Object 1: Player class for the main character
 class Player {
   constructor() {
-    // Initial position and movement
+    // Application Stage: Primitive Properties & State Tracking
     this.position = { x: 100, y: 100 };
     this.velocity = { x: 0, y: 0 };
     this.width = 30;
@@ -30,42 +32,42 @@ class Player {
     this.speed = 8;
   }
 
-  // Draw the player (robot)
+  // Draw method spans both Geometry & Rasterization Stages
   draw() {
-    // Robot Body
-    c.fillStyle = "#00BFFF";
-    c.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+    /* 
+        STAG GEOMETRY STAGE (Vertex / Primitive Generation)
+ Methods like c.beginPath(), c.moveTo(), c.lineTo(), and c.arc() define the 
+ vertices, vectors, and mathematical pathways in local/world coordinate space.
+
+  RASTERIZATION STAGE (Pixel / Fragment Operations)
+ Methods like c.fillStyle, c.strokeStyle, c.fill(), and c.stroke() instruct 
+ the GPU to convert those vector primitives into actual colored pixels 
+ inside the canvas Framebuffer.
+     */
+
+    // Robot Body 
+    c.fillStyle = "#00BFFF"; // Rasterization: Setting fragment color
+    c.fillRect(this.position.x, this.position.y, this.width, this.height); // Geometry & Rasterization combined
 
     // Robot Antenna
     c.strokeStyle = "#FFFFFF";
     c.lineWidth = 2;
-    c.beginPath();
-    c.moveTo(this.position.x + this.width / 2, this.position.y);
-    c.lineTo(this.position.x + this.width / 2, this.position.y - 10);
-    c.stroke();
+    c.beginPath(); // Geometry: Starting a primitive vector path
+    c.moveTo(this.position.x + this.width / 2, this.position.y); // Geometry: Vertex 1
+    c.lineTo(this.position.x + this.width / 2, this.position.y - 10); // Geometry: Vertex 2
+    c.stroke(); // Rasterization: Rendering the line to pixels
 
     // Antenna glowing tip
     c.fillStyle = "red";
     c.beginPath();
-    c.arc(
-      this.position.x + this.width / 2,
-      this.position.y - 10,
-      3,
-      0,
-      Math.PI * 2,
-    );
-    c.fill();
+    c.arc(this.position.x + this.width / 2, this.position.y - 10, 3, 0, Math.PI * 2); // Geometry: Math-based arc primitive
+    c.fill(); // Rasterization: Filling pixel fragments
 
     // Robot Eye
     c.fillStyle = "white";
     c.beginPath();
-    c.arc(
-      this.position.x + this.width / 2,
-      this.position.y + 12,
-      8,
-      0,
-      Math.PI * 2,
-    );
+    c.arc(this.position.x + this.width / 2, this.position.y + 12, 8, 0, Math.PI * 2);
     c.fill();
 
     // Pupil (looks left/right when moving)
@@ -75,17 +77,11 @@ class Player {
 
     c.fillStyle = "black";
     c.beginPath();
-    c.arc(
-      this.position.x + this.width / 2 + lookOffset,
-      this.position.y + 12,
-      4,
-      0,
-      Math.PI * 2,
-    );
+    c.arc(this.position.x + this.width / 2 + lookOffset, this.position.y + 12, 4, 0, Math.PI * 2);
     c.fill();
   }
 
-  // Update player position and apply gravity
+  // Update player position and apply gravity (Application Stage: Physics Model)
   update() {
     this.draw();
     this.position.x += this.velocity.x;
@@ -98,15 +94,17 @@ class Player {
   }
 }
 
-// Platform class for ground and ledges
+// Object 2: Platform class for ground and ledges
 class Platform {
   constructor({ x, y, width, height }) {
     this.position = { x, y };
     this.width = width;
     this.height = height;
   }
-  // Draw the platform (brown with green top)
+  
   draw() {
+    // Geometry: Creating bounding coordinates for rectangles
+    // Rasterization: Texturing/coloring the fragments brown and green
     c.fillStyle = "#654321";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
     c.fillStyle = "#4CAF50";
@@ -114,22 +112,23 @@ class Platform {
   }
 }
 
-// Hill class for background scenery
+// Object 3: Hill class for background scenery
 class Hill {
   constructor({ x, y, radius }) {
     this.position = { x, y };
     this.radius = radius;
   }
-  // Draw a green hill
+  
   draw() {
+    // Geometry: Calculating circle arc vertices mathematically
     c.fillStyle = "#2E8B57";
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, Math.PI, 0, false);
-    c.fill();
+    c.fill(); // Rasterization: Mapping pixels inside the arc boundary
   }
 }
 
-// GenericObject for background images
+// Object 4: GenericObject for background images
 class GenericObject {
   constructor({ x, y, image }) {
     this.position = { x, y };
@@ -137,18 +136,25 @@ class GenericObject {
   }
   draw() {
     if (this.image) {
+ 
+
+      /* 
+       RASTERIZATION: RASTER TEXTURE MAPPING
+   c.drawImage takes a pre-rasterized 2D pixel array (the image file) and 
+      maps/blits its texels directly onto the canvas frame buffer array coordinates.
+       */
       c.drawImage(this.image, this.position.x, this.position.y);
     }
   }
 }
 
-// Coin class for collectible coins
+// Object 5: Coin class for collectible coins
 class Coin {
   constructor({ x, y }) {
     this.position = { x, y };
     this.radius = 12;
   }
-  // Draw a gold coin with a $ sign
+  
   draw() {
     c.fillStyle = "gold";
     c.beginPath();
@@ -167,15 +173,15 @@ class Coin {
   }
 }
 
-// --- GAME STATE ---
-// Game objects and state variables
+
+// Game objects and state variables (Application Stage: Memory allocation)
 let player = new Player();
 let platforms = [];
 let genericObjects = [];
 let hills = [];
 let coins = [];
 
-// Keyboard input tracking
+// Keyboard input tracking (Application Stage: I/O Event Handling)
 const Keys = {
   right: { pressed: false },
   left: { pressed: false },
@@ -187,97 +193,79 @@ let nextHillX = 0;
 let score = 0;
 let highScore = localStorage.getItem("endlessHighScore") || 0;
 
-// Spawn a new random platform and coins
+// Spawn a new random platform and coins (Application Stage: Algorithmic Scene Generation)
 function spawnRandomPlatform() {
-  // Randomize platform size and position
-  const width = Math.random() * 250 + 150; // Width between 150px and 400px
+  const width = Math.random() * 250 + 150; 
   const height = 200;
-  const y = Math.random() * 130 + 360; // Heights varying safely between 360px and 490px
+  const y = Math.random() * 130 + 360; 
 
   platforms.push(new Platform({ x: nextPlatformX, y, width, height }));
 
-  // Spawn 0-3 coins above the platform
-  const coinCount = Math.floor(Math.random() * 4); // 0 to 3 coins
+  const coinCount = Math.floor(Math.random() * 4); 
   for (let i = 0; i < coinCount; i++) {
     const coinX = nextPlatformX + (width / (coinCount + 1)) * (i + 1);
-    const coinY = y - 35; // Suspended slightly above grass level
+    const coinY = y - 35; 
     coins.push(new Coin({ x: coinX, y: coinY }));
   }
 
-  // Move next platform further right
-  const gap = Math.random() * 100 + 100; // Gap between 100px and 200px
+  const gap = Math.random() * 100 + 100; 
   nextPlatformX += width + gap;
 }
 
-// Spawn a new random hill for background
 function spawnRandomHill() {
-  const radius = Math.random() * 150 + 150; // Random sizes
+  const radius = Math.random() * 150 + 150; 
   hills.push(new Hill({ x: nextHillX, y: 576, radius }));
 
-  // Move next hill further right
   const separation = Math.random() * 300 + 400;
   nextHillX += separation;
 }
 
-// Reset game state to start or restart
 function init() {
   player = new Player();
   score = 0;
 
-  // Create starting platform
   platforms = [new Platform({ x: -100, y: 470, width: 700, height: 125 })];
-
-  // Place initial coins
   coins = [new Coin({ x: 300, y: 420 }), new Coin({ x: 450, y: 420 })];
-
-  // Place initial hills
   hills = [
     new Hill({ x: 200, y: 576, radius: 200 }),
     new Hill({ x: 700, y: 576, radius: 250 }),
   ];
-
-  // Add background image
   genericObjects = [
     new GenericObject({ x: -1, y: -1, image: backgroundImage }),
   ];
 
-  // Set initial positions for procedural generation
   nextPlatformX = 600 + Math.random() * 100 + 100;
   nextHillX = 1100;
 }
 
-// Main game loop
+// Main game loop (The continuous Pipeline Driver)
 function animate() {
   requestAnimationFrame(animate);
 
-  // Clear screen
+
+  /* 
+       RASTERIZATION: FRAME BUFFER CLEARING
+   c.fillRect takes a color and fills the entire canvas frame buffer with it,
+      effectively clearing the previous frame's pixels.
+       */
   c.fillStyle = "white";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
-  // 1. Draw background, hills, platforms
+  // 1. EXECUTE DRAW CALLS (Passes geometry representations down to the Rasterizer)
   genericObjects.forEach((genericObject) => genericObject.draw());
   hills.forEach((hill) => hill.draw());
   platforms.forEach((platform) => platform.draw());
 
-  // 2. Draw and check for coin collection
+  // 2. Draw and check for coin collection (Application Stage: AABB Collision Logic)
   coins.forEach((coin, index) => {
     coin.draw();
 
-    // Check collision with player
-    const distX = Math.abs(
-      coin.position.x - (player.position.x + player.width / 2),
-    );
-    const distY = Math.abs(
-      coin.position.y - (player.position.y + player.height / 2),
-    );
+    const distX = Math.abs(coin.position.x - (player.position.x + player.width / 2));
+    const distY = Math.abs(coin.position.y - (player.position.y + player.height / 2));
 
-    if (
-      distX < player.width / 2 + coin.radius &&
-      distY < player.height / 2 + coin.radius
-    ) {
+    if (distX < player.width / 2 + coin.radius && distY < player.height / 2 + coin.radius) {
       coins.splice(index, 1);
       score += 1;
-      // Update high score if needed
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("endlessHighScore", highScore);
@@ -285,10 +273,9 @@ function animate() {
     }
   });
 
-  // Update player position
   player.update();
 
-  // 3. Draw HUD (score and high score)
+  // 3. Draw HUD text (Rasterization: Glyph rasterization mapping)
   c.fillStyle = "black";
   c.font = "bold 22px Arial";
   c.textAlign = "left";
@@ -296,7 +283,7 @@ function animate() {
   c.fillStyle = "#555";
   c.fillText(`Best: ${highScore}`, 25, 75);
 
-  // 4. Generate new platforms/hills as needed
+  // 4. Generate data (Application Stage: Scene Graph Updates)
   while (nextPlatformX < canvas.width + 500) {
     spawnRandomPlatform();
   }
@@ -304,12 +291,21 @@ function animate() {
     spawnRandomHill();
   }
 
-  // 5. Remove off-screen objects to save memory
+  
+  /* 
+       GEOMETRY STAGE: CPU-SIDE VIEWPORT FRUSTUM CLIPPING
+       Filtering out arrays of data that have completely shifted outside our 
+       view matrix boundaries so we aren't wasting GPU rasterization cycles on invisible geometry.
+   */
   platforms = platforms.filter((p) => p.position.x + p.width > -200);
   coins = coins.filter((c) => c.position.x + c.radius > -100);
   hills = hills.filter((h) => h.position.x + h.radius > -400);
-
-  // 6. Handle player movement and world scrolling
+ 
+  /* 
+       GEOMETRY STAGE: WORLD-SPACE TO VIEW-SPACE MATRIX TRANSFORMATION
+       When a player moves, instead of moving the player in world space, we alter 
+       the position coordinates of the world objects relative to the viewport window camera.
+   */
   if (Keys.right.pressed && player.position.x < 400) {
     player.velocity.x = player.speed;
   } else if (Keys.left.pressed && player.position.x > 100) {
@@ -317,17 +313,15 @@ function animate() {
   } else {
     player.velocity.x = 0;
 
-    // Scroll world left/right if player at edge
     if (Keys.right.pressed) {
       platforms.forEach((p) => (p.position.x -= player.speed));
       coins.forEach((c) => (c.position.x -= player.speed));
-      hills.forEach((h) => (h.position.x -= player.speed * 0.5)); // Parallax
-      genericObjects.forEach((obj) => (obj.position.x -= player.speed * 0.1)); // Slow Sky
+      hills.forEach((h) => (h.position.x -= player.speed * 0.5)); // Matrix scale factor (0.5x Parallax)
+      genericObjects.forEach((obj) => (obj.position.x -= player.speed * 0.1)); 
 
       nextPlatformX -= player.speed;
       nextHillX -= player.speed * 0.5;
     } else if (Keys.left.pressed) {
-      // Move world right if going left
       platforms.forEach((p) => (p.position.x += player.speed));
       coins.forEach((c) => (c.position.x += player.speed));
       hills.forEach((h) => (h.position.x += player.speed * 0.5));
@@ -338,12 +332,11 @@ function animate() {
     }
   }
 
-  // 7. Collision detection with platforms (landing)
+  // 7. Collision detection with platforms (Application Stage: Physics Collision Solver)
   platforms.forEach((platform) => {
     if (
       player.position.y + player.height <= platform.position.y &&
-      player.position.y + player.height + player.velocity.y >=
-        platform.position.y &&
+      player.position.y + player.height + player.velocity.y >= platform.position.y &&
       player.position.x + player.width >= platform.position.x &&
       player.position.x <= platform.position.x + platform.width
     ) {
@@ -351,23 +344,22 @@ function animate() {
     }
   });
 
-  // 8. Reset game if player falls off screen
+  // 8. Reset scene graph data structure if threshold passed
   if (player.position.y > canvas.height) {
     init();
   }
 }
 
 // --- CONTROLS ---
-// Keyboard controls for movement and jumping
 addEventListener("keydown", ({ keyCode }) => {
   switch (keyCode) {
-    case 65: // A - move left
+    case 65: // A
       Keys.left.pressed = true;
       break;
-    case 68: // D - move right
+    case 68: // D
       Keys.right.pressed = true;
       break;
-    case 87: // W - jump
+    case 87: // W
       if (player.velocity.y === 0) {
         player.velocity.y = -12;
       }
@@ -377,10 +369,10 @@ addEventListener("keydown", ({ keyCode }) => {
 
 addEventListener("keyup", ({ keyCode }) => {
   switch (keyCode) {
-    case 65: // A - stop left
+    case 65: // A
       Keys.left.pressed = false;
       break;
-    case 68: // D - stop right
+    case 68: // D
       Keys.right.pressed = false;
       break;
   }
