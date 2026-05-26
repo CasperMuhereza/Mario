@@ -1,5 +1,3 @@
-
-
 // Get canvas and context
 const canvas = document.querySelector("canvas");
 const c = canvas.getContext("2d");
@@ -8,7 +6,7 @@ const c = canvas.getContext("2d");
 canvas.width = 1024;
 canvas.height = 576;
 
-// Gravity constant for jumping/falling (Application Stage: Physics Simulation)
+// Gravity constant for jumping/falling
 const gravity = 0.5;
 
 // Load background image and start game when ready
@@ -21,10 +19,9 @@ backgroundImage.src = "./images/background.png";
 
 // --- CLASSES ---
 
-// Object 1: Player class for the main character
+// Player class for the main character
 class Player {
   constructor() {
-    // Application Stage: Primitive Properties & State Tracking
     this.position = { x: 100, y: 100 };
     this.velocity = { x: 0, y: 0 };
     this.width = 30;
@@ -32,42 +29,42 @@ class Player {
     this.speed = 8;
   }
 
-  // Draw method spans both Geometry & Rasterization Stages
+  // Draw the player (robot)
   draw() {
-
-    /* 
-        STAG GEOMETRY STAGE (Vertex / Primitive Generation)
- Methods like c.beginPath(), c.moveTo(), c.lineTo(), and c.arc() define the 
- vertices, vectors, and mathematical pathways in local/world coordinate space.
-
-  RASTERIZATION STAGE (Pixel / Fragment Operations)
- Methods like c.fillStyle, c.strokeStyle, c.fill(), and c.stroke() instruct 
- the GPU to convert those vector primitives into actual colored pixels 
- inside the canvas Framebuffer.
-     */
-
-    // Robot Body 
-    c.fillStyle = "#00BFFF"; // Rasterization: Setting fragment color
-    c.fillRect(this.position.x, this.position.y, this.width, this.height); // Geometry & Rasterization combined
+    // Robot Body
+    c.fillStyle = "#00BFFF";
+    c.fillRect(this.position.x, this.position.y, this.width, this.height);
 
     // Robot Antenna
     c.strokeStyle = "#FFFFFF";
     c.lineWidth = 2;
-    c.beginPath(); // Geometry: Starting a primitive vector path
-    c.moveTo(this.position.x + this.width / 2, this.position.y); // Geometry: Vertex 1
-    c.lineTo(this.position.x + this.width / 2, this.position.y - 10); // Geometry: Vertex 2
-    c.stroke(); // Rasterization: Rendering the line to pixels
+    c.beginPath();
+    c.moveTo(this.position.x + this.width / 2, this.position.y);
+    c.lineTo(this.position.x + this.width / 2, this.position.y - 10);
+    c.stroke();
 
     // Antenna glowing tip
     c.fillStyle = "red";
     c.beginPath();
-    c.arc(this.position.x + this.width / 2, this.position.y - 10, 3, 0, Math.PI * 2); // Geometry: Math-based arc primitive
-    c.fill(); // Rasterization: Filling pixel fragments
+    c.arc(
+      this.position.x + this.width / 2,
+      this.position.y - 10,
+      3,
+      0,
+      Math.PI * 2
+    );
+    c.fill();
 
     // Robot Eye
     c.fillStyle = "white";
     c.beginPath();
-    c.arc(this.position.x + this.width / 2, this.position.y + 12, 8, 0, Math.PI * 2);
+    c.arc(
+      this.position.x + this.width / 2,
+      this.position.y + 12,
+      8,
+      0,
+      Math.PI * 2
+    );
     c.fill();
 
     // Pupil (looks left/right when moving)
@@ -77,11 +74,17 @@ class Player {
 
     c.fillStyle = "black";
     c.beginPath();
-    c.arc(this.position.x + this.width / 2 + lookOffset, this.position.y + 12, 4, 0, Math.PI * 2);
+    c.arc(
+      this.position.x + this.width / 2 + lookOffset,
+      this.position.y + 12,
+      4,
+      0,
+      Math.PI * 2
+    );
     c.fill();
   }
 
-  // Update player position and apply gravity (Application Stage: Physics Model)
+  // Update player position and apply gravity
   update() {
     this.draw();
     this.position.x += this.velocity.x;
@@ -94,17 +97,15 @@ class Player {
   }
 }
 
-// Object 2: Platform class for ground and ledges
+// Platform class for ground and ledges
 class Platform {
   constructor({ x, y, width, height }) {
     this.position = { x, y };
     this.width = width;
     this.height = height;
   }
-  
+  // Draw the platform (brown with green top)
   draw() {
-    // Geometry: Creating bounding coordinates for rectangles
-    // Rasterization: Texturing/coloring the fragments brown and green
     c.fillStyle = "#654321";
     c.fillRect(this.position.x, this.position.y, this.width, this.height);
     c.fillStyle = "#4CAF50";
@@ -112,23 +113,22 @@ class Platform {
   }
 }
 
-// Object 3: Hill class for background scenery
+// Hill class for background scenery
 class Hill {
   constructor({ x, y, radius }) {
     this.position = { x, y };
     this.radius = radius;
   }
-  
+  // Draw a green hill
   draw() {
-    // Geometry: Calculating circle arc vertices mathematically
     c.fillStyle = "#2E8B57";
     c.beginPath();
     c.arc(this.position.x, this.position.y, this.radius, Math.PI, 0, false);
-    c.fill(); // Rasterization: Mapping pixels inside the arc boundary
+    c.fill();
   }
 }
 
-// Object 4: GenericObject for background images
+// GenericObject for background images
 class GenericObject {
   constructor({ x, y, image }) {
     this.position = { x, y };
@@ -136,25 +136,18 @@ class GenericObject {
   }
   draw() {
     if (this.image) {
- 
-
-      /* 
-       RASTERIZATION: RASTER TEXTURE MAPPING
-   c.drawImage takes a pre-rasterized 2D pixel array (the image file) and 
-      maps/blits its texels directly onto the canvas frame buffer array coordinates.
-       */
       c.drawImage(this.image, this.position.x, this.position.y);
     }
   }
 }
 
-// Object 5: Coin class for collectible coins
+// Coin class for collectible coins
 class Coin {
   constructor({ x, y }) {
     this.position = { x, y };
     this.radius = 12;
   }
-  
+  // Draw a gold coin with a $ sign
   draw() {
     c.fillStyle = "gold";
     c.beginPath();
@@ -173,7 +166,7 @@ class Coin {
   }
 }
 
-
+// --- GAME STATE ---
 // Game objects and state variables (Application Stage: Memory allocation)
 let player = new Player();
 let platforms = [];
@@ -192,6 +185,22 @@ let nextPlatformX = 0;
 let nextHillX = 0;
 let score = 0;
 let highScore = localStorage.getItem("endlessHighScore") || 0;
+
+// --- UI OVERLAY LOGIC ---
+let gameStarted = false; 
+const overlay = document.getElementById("instruction-overlay");
+const startButton = document.getElementById("start-btn");
+
+// Function to hide the UI and start the game engine
+function startGame() {
+  if (!gameStarted) {
+    gameStarted = true;
+    overlay.classList.add("hidden"); 
+  }
+}
+
+// Listen for mouse click on the start button
+startButton.addEventListener("click", startGame);
 
 // Spawn a new random platform and coins (Application Stage: Algorithmic Scene Generation)
 function spawnRandomPlatform() {
@@ -242,12 +251,18 @@ function init() {
 function animate() {
   requestAnimationFrame(animate);
 
+  // Freeze game logic and rendering if game hasn't started yet
+  if (!gameStarted) {
+    c.fillStyle = "#111";
+    c.fillRect(0, 0, canvas.width, canvas.height);
+    genericObjects.forEach((genericObject) => genericObject.draw());
+    return; 
+  }
 
-  /* 
-       RASTERIZATION: FRAME BUFFER CLEARING
+  /* RASTERIZATION: FRAME BUFFER CLEARING
    c.fillRect takes a color and fills the entire canvas frame buffer with it,
       effectively clearing the previous frame's pixels.
-       */
+        */
   c.fillStyle = "white";
   c.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -291,20 +306,17 @@ function animate() {
     spawnRandomHill();
   }
 
-  
-  /* 
-       GEOMETRY STAGE: CPU-SIDE VIEWPORT FRUSTUM CLIPPING
-       Filtering out arrays of data that have completely shifted outside our 
-       view matrix boundaries so we aren't wasting GPU rasterization cycles on invisible geometry.
+  /* GEOMETRY STAGE: CPU-SIDE VIEWPORT FRUSTUM CLIPPING
+        Filtering out arrays of data that have completely shifted outside our 
+        view matrix boundaries so we aren't wasting GPU rasterization cycles on invisible geometry.
    */
   platforms = platforms.filter((p) => p.position.x + p.width > -200);
   coins = coins.filter((c) => c.position.x + c.radius > -100);
   hills = hills.filter((h) => h.position.x + h.radius > -400);
- 
-  /* 
-       GEOMETRY STAGE: WORLD-SPACE TO VIEW-SPACE MATRIX TRANSFORMATION
-       When a player moves, instead of moving the player in world space, we alter 
-       the position coordinates of the world objects relative to the viewport window camera.
+
+  /* GEOMETRY STAGE: WORLD-SPACE TO VIEW-SPACE MATRIX TRANSFORMATION
+        When a player moves, instead of moving the player in world space, we alter 
+        the position coordinates of the world objects relative to the viewport window camera.
    */
   if (Keys.right.pressed && player.position.x < 400) {
     player.velocity.x = player.speed;
@@ -352,6 +364,15 @@ function animate() {
 
 // --- CONTROLS ---
 addEventListener("keydown", ({ keyCode }) => {
+  // Start the game if spacebar (32) is pressed and the game hasn't started
+  if (keyCode === 32 && !gameStarted) {
+    startGame();
+    return;
+  }
+
+  // Ignore actual player movements if game hasn't actively initialized execution
+  if (!gameStarted) return;
+
   switch (keyCode) {
     case 65: // A
       Keys.left.pressed = true;
@@ -368,6 +389,8 @@ addEventListener("keydown", ({ keyCode }) => {
 });
 
 addEventListener("keyup", ({ keyCode }) => {
+  if (!gameStarted) return;
+
   switch (keyCode) {
     case 65: // A
       Keys.left.pressed = false;
